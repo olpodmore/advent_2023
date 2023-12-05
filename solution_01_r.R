@@ -11,7 +11,36 @@ calibrations_df <- tibble(calibrations) %>%
 # solution part 1
 sum(calibrations_df$two_digits)
 
-numbers_as_words <- c("one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
+# part 2
+find_numbers <- function (x) {
+  
+  matches <- str_locate_all(x, c("one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", 
+                                                                "1", "2", "3", "4", "5", "6", "7", "8", "9"))
+  all <- do.call(rbind, matches)
+  start <- all[, 1]
+  stop <- all[, 2]
+  number_locations <- tibble(start, stop)
+  first_number_location <- arrange(number_locations, (start)) %>% slice(1)
+  last_number_location <- arrange(number_locations, desc(start)) %>% slice(1)
+  
+  first_number <- str_sub(x, first_number_location$start[1], first_number_location$stop[1])
+  last_number <- str_sub(x, last_number_location$start[1], last_number_location$stop[1])
+  
+  first_and_last_number <- paste0(first_number, last_number)
+  
+  return (first_and_last_number)
+  
+}
 
-# will continue part 2 later
+numbers <- sapply(calibrations_df$calibrations, find_numbers)
+
+numbers_as_digits <- str_replace_all(numbers, c("one" = "1", "two"="2",
+                                      "three" = "3", "four" = "4",
+                                      "five" = "5", "six" = "6",
+                                      "seven"="7", "eight"="8",
+                                      "nine"="9"))
+
+# solution part 2
+sum(as.numeric(numbers_as_digits))
+
 
