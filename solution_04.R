@@ -1,30 +1,8 @@
 library(tidyverse)
 
-#scratchcards <- read_lines("input_04.txt")
-
 scratchcards <- read_delim("input_04.txt", delim = "|", col_names = F)
 
 names(scratchcards) <- c("winning_numbers", "my_numbers") 
-
-
-colnames_winning_numbers <- c()
-
-for (i in 1:10) {
-  
-  name <- paste0("winning_number_", i)
-  colnames_winning_numbers <- c(colnames_winning_numbers, name)
-  
-}
-
-colnames_my_numbers <- c()
-
-for (i in 1:25) {
-  
-  name <- paste0("my_number_", i)
-  colnames_my_numbers <- c(colnames_my_numbers, name)
-  
-}
-
 
 scratchcards_separated <- scratchcards %>%
   separate(col=winning_numbers, into = c("game_number", "winning_numbers"), sep=":") %>%
@@ -47,6 +25,7 @@ sum(scratchcard_winners$points)
 # part 2 ------------------------------------------------------------------
 
 
+# TBC
 
 
 
@@ -57,9 +36,24 @@ sum(scratchcard_winners$points)
 
 
 
-
-
-
+# 
+# colnames_winning_numbers <- c()
+# 
+# for (i in 1:10) {
+#   
+#   name <- paste0("winning_number_", i)
+#   colnames_winning_numbers <- c(colnames_winning_numbers, name)
+#   
+# }
+# 
+# colnames_my_numbers <- c()
+# 
+# for (i in 1:25) {
+#   
+#   name <- paste0("my_number_", i)
+#   colnames_my_numbers <- c(colnames_my_numbers, name)
+#   
+# }
 
 
 # scratchcards_separated <- scratchcards %>%
