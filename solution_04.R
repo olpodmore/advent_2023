@@ -4,10 +4,12 @@ scratchcards <- read_delim("input_04.txt", delim = "|", col_names = F)
 
 names(scratchcards) <- c("winning_numbers", "my_numbers") 
 
-scratchcards_separated <- scratchcards %>%
+scratchcards_clean <- scratchcards %>%
   separate(col=winning_numbers, into = c("game_number", "winning_numbers"), sep=":") %>%
   mutate(winning_numbers = str_trim(winning_numbers, side="both"), my_numbers = str_trim(my_numbers, side="both")) %>%
-  mutate(winning_numbers = str_replace_all(winning_numbers, "  ", " "), my_numbers = str_replace_all(my_numbers, "  ", " ")) %>%
+  mutate(winning_numbers = str_replace_all(winning_numbers, "  ", " "), my_numbers = str_replace_all(my_numbers, "  ", " ")) 
+
+scratchcards_separated <- scratchcards_clean %>%
   separate_rows(winning_numbers, sep= " ") %>%
   separate_rows(my_numbers, sep =" ")
 
@@ -24,55 +26,36 @@ sum(scratchcard_winners$points)
 
 # part 2 ------------------------------------------------------------------
 
+# add back in the scratch cards with no winners
 
-# TBC
+scratchcard_win_counts <- scratchcards_clean %>%
+  select(game_number) %>%
+  left_join(scratchcard_winners, by="game_number") %>%
+  mutate("game_number" = as.numeric(str_extract(game_number, "[[:digit:]]+"))) #%>% # reduce to just digit to make it easier to match
 
+scratchcard_win_counts_fixed <- scratchcard_win_counts
 
-
-
-
-
-
-
-
-
-# 
-# colnames_winning_numbers <- c()
-# 
-# for (i in 1:10) {
-#   
-#   name <- paste0("winning_number_", i)
-#   colnames_winning_numbers <- c(colnames_winning_numbers, name)
-#   
-# }
-# 
-# colnames_my_numbers <- c()
-# 
-# for (i in 1:25) {
-#   
-#   name <- paste0("my_number_", i)
-#   colnames_my_numbers <- c(colnames_my_numbers, name)
-#   
-# }
-
-
-# scratchcards_separated <- scratchcards %>%
-#   separate(col=winning_numbers, into = c("game_number", "winning_numbers"), sep=":") %>%
-#   mutate(winning_numbers = str_trim(winning_numbers, side="both"), my_numbers = str_trim(my_numbers, side="both")) %>%
-#   mutate(winning_numbers = str_replace_all(winning_numbers, "  ", " "), my_numbers = str_replace_all(my_numbers, "  ", " ")) %>%
-#   separate(col=winning_numbers, into=colnames_winning_numbers, sep = " ", remove=FALSE) %>%
-#   separate(col=my_numbers, into=colnames_my_numbers, sep = " ", remove=FALSE) %>%
-#   pivot_longer(cols=colnames_winning_numbers, names_to="winning_number_id", values_to="winning_number_value") %>%
-#   pivot_longer(cols=colnames_my_numbers, names_to="my_number_id", values_to="my_number_value")
-# 
-# scratchcard_winners <- scratchcards_separated %>%
-#   group_by(game_number) %>%
-#   mutate(winning_number = my_number_value %in% winning_number_value)
-#   
-# 
-# test <- tibble(game_number=c(1,1,1,2,2,2), winning=c(3,4,5,6,7,8), mine=c(4,5,6,7,8,3))
-# 
-# test2 <- test %>%
-#   group_by(game_number) %>%
-#   mutate(winning_number = mine %in% winning)
+for (i in 1:202) {
+  
+  game_df <- scratchcard_win_counts %>%
+    filter(game_number==i) %>%
+    group_by(game_number, number_of_winners, points) %>%
+    summarise(number_of_cards = n())
+  
+  number_of_wins <- game_df %>%
+    pull(number_of_winners)
+  
+  number_of_cards <- game_df %>%
+    pull()
+  
+  if (!is.na(number_of_wins)) {
+    which_card_copies_won <- (i+1):(i+number_of_wins)
+    card_copies <- rep(which_card_copies_won, number_of_cards)
+    card_copies_index <- tibble(game_number = card_copies)
+    card_copies_to_duplicate <- left_join(card_copies_index, scratchcard_win_counts_fixed) # add number of winners to copied cards
+    scratchcard_win_counts <- bind_rows(scratchcard_win_counts, card_copies_to_duplicate) 
+  }
+  
+  
+}
 
